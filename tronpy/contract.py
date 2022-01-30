@@ -158,6 +158,20 @@ class Contract(object):
 
         raise NameError("Contract has no constructor")
 
+    def get_events(self, event_name, from_block, to_block):
+        from_block_data = self._client.get_block(from_block)
+        to_block_data = self._client.get_block(to_block)
+
+        payload = {
+            "event_name": event_name,
+            "min_block_timestamp": from_block_data['block_header']['raw_data']['timestamp'],
+            "max_block_timestamp": to_block_data['block_header']['raw_data']['timestamp'],
+        }
+        method = "v1/contracts/{}/events".format(self.contract_address)
+        ret = self._client.provider.make_request(method, payload, request_method='GET')
+        self._client._handle_api_error(ret)
+        return ret['data']
+
 
 class ContractFunctions(object):
     def __init__(self, contract):
